@@ -1,0 +1,5 @@
+Pillow
+psd-tools
+reportlab
+rembg
+opencv-python-headless
