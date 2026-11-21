@@ -1,3 +1,4 @@
+import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -181,5 +182,27 @@ class _EdState extends State<PackagingEditor> {
       const SizedBox(height: 8),
       Text('Molde: ${widget.molde.nombre} - ${widget.molde.desc} - Uso: ${widget.molde.uso}', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
     ])));
+  }
+}
+
+class Packaging3DPage extends StatefulWidget {
+  final Map<String, dynamic> molde;
+  const Packaging3DPage({super.key, required this.molde});
+  @override State<Packaging3DPage> createState() => _Packaging3DPageState();
+}
+class _Packaging3DPageState extends State<Packaging3DPage> {
+  late final WebViewController c;
+  @override void initState() {
+    super.initState();
+    c = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(NavigationDelegate(onPageFinished: (_) { c.runJavaScript("loadMoldFromDart('${jsonEncode(widget.molde)}')"); }))
+      ..loadFlutterAsset('assets/visor3d/index.html');
+  }
+  @override Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('LABEL 3D ENGINE'), leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context))),
+      body: WebViewWidget(controller: c),
+    );
   }
 }

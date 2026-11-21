@@ -1,6 +1,15 @@
+import 'ai_credits_api.dart';
+import 'ai_subscriptions.dart';
+import 'label_theme.dart';
+import 'label_backend_service.dart';
 
+import 'camera_studio.dart';
+import 'camera_home.dart';
+import 'canvas_editor.dart';
+import 'canva_generico.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'packaging_library.dart';
 
@@ -12,7 +21,7 @@ import 'packaging_library.dart';
 const String backend = 'http://127.0.0.1:8001';
 String eyeTokenGlobal = '';
 int eyeUserIdGlobal = 0;
-int eyeCreditosGlobal = 10;
+int eyeCreditosGlobal = 300;
 
 class AppTema {
   static bool esNoche = false;
@@ -22,8 +31,8 @@ class AppTema {
   static Color get cardGris => esNoche ? const Color(0xFF1E241E) : const Color(0xFFF2F3F5);
   static Color get texto => esNoche ? Colors.white : const Color(0xFF333333);
   static Color get textoSuave => esNoche ? const Color(0xFF9BAE9D) : const Color(0xFF8A8A8A);
-  static Color get primario => esNoche ? const Color(0xFF2E9E6B) : const Color(0xFF2B4A6B);
-  static Color get acento => esNoche ? const Color(0xFF3AA76D) : const Color(0xFF2A8A7A);
+  static Color get primario => esNoche ? const Color(0xFF2E9E6B) : const Color(0xFFFFD400);
+  static Color get acento => esNoche ? const Color(0xFF3AA76D) : const Color(0xFF00B5AD);
   static Color get borde => esNoche ? const Color(0xFF2E9E6B).withOpacity(0.3) : const Color(0xFFE5E5E5);
 }
 
@@ -38,16 +47,10 @@ class LabelApp extends StatefulWidget {
 class _LabelAppState extends State<LabelApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp(localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate], supportedLocales: const [Locale('es','MX'), Locale('en','US')], locale: const Locale('es','MX'),
       title: 'Label - KIMAD',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: AppTema.fondo,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppTema.primario, brightness: AppTema.esNoche ? Brightness.dark : Brightness.light),
-        appBarTheme: AppBarTheme(backgroundColor: AppTema.card, foregroundColor: AppTema.texto, elevation: 0),
-        fontFamily: 'Roboto',
-      ),
+      theme: LabelTheme.light,
       home: const LoginScreen(),
     );
   }
@@ -123,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
             final v = jsonDecode(r.body) as Map<String, dynamic>;
             eyeTokenGlobal = (v['token'] as String?) ?? '';
             eyeUserIdGlobal = (v['user_id'] as num?)?.toInt() ?? 0;
-            eyeCreditosGlobal = (v['credits'] as num?)?.toInt() ?? 10;
+            eyeCreditosGlobal = (v['credits'] as num?)?.toInt()  ?? 300;
           } catch (_) {}
         } else {
           try {
@@ -199,6 +202,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 campo('Frase 6 palabras', 'miel cafe luna sol rio mar', frase),
                 const SizedBox(height: 14),
                 // FIX assertion ListTile: SwitchListTile dentro de un Container con
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Colors.teal),
+                title: const Text('Foto + AI Basica'),
+                subtitle: const Text('Abrir camara, tomar foto y editarla'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CameraHomePage())),
+              ),
+              ListTile(
+                leading: const Icon(Icons.design_services, color: Colors.teal),
+                title: const Text('Canva Generico - Disenar'),
+                subtitle: const Text('Plantillas + Texto + Formas + Capas + AI gratis + Recorte'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CanvaGenericoPage())),
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit, color: Colors.amber),
+                title: const Text('Canvas Label - Editar Etiqueta'),
+                subtitle: const Text('AI gratis + Recorte de fondo'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CanvasEditorPage())),
+              ),
+              ListTile(
+                leading: const Icon(Icons.view_in_ar, color: Colors.green),
+                title: const Text('LABEL 3D ENGINE'),
+                subtitle: const Text('Visor 3D + 24 moldes + .GLB'),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Packaging3DPage(molde: const {'tipo': 'cilindro', 'r': 3.3, 'h': 12.2, 'label': 'Lata 355 ml'}))),
+              ),
                 // BoxDecoration (fondo blanco) tapa el ink splash de ListTile.
                 // Se usa Row + Text + Switch (sin ListTile) y el assertion desaparece.
                 Row(children: [
@@ -593,7 +620,7 @@ class _HomeScreenState extends State<HomeScreen> {
           btn('Exportar PNG / JPG / PDF / 3D', AppTema.primario, () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Exportado')))),
         ]),
         const SizedBox(height: 12),
-        Row(children: [const Text('Colores: ', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)), for (var c in [Colors.white, const Color(0xFFF2F3F5), const Color(0xFF2B4A6B), const Color(0xFF333333), const Color(0xFF8A8A8A), const Color(0xFF2A8A7A), const Color(0xFF9BAE9D)]) Container(width: 28, height: 28, margin: const EdgeInsets.only(right: 6), decoration: BoxDecoration(color: c, shape: BoxShape.circle, border: Border.all(color: Colors.grey)))]),
+        Row(children: [const Text('Colores: ', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)), for (var c in [Colors.white, const Color(0xFFF2F3F5), const Color(0xFFFFD400), const Color(0xFF333333), const Color(0xFF8A8A8A), const Color(0xFF00B5AD), const Color(0xFF9BAE9D)]) Container(width: 28, height: 28, margin: const EdgeInsets.only(right: 6), decoration: BoxDecoration(color: c, shape: BoxShape.circle, border: Border.all(color: Colors.grey)))]),
       ])),
       const SizedBox(height: 16),
       cardBox('Biblioteca 3D - 24 Moldes → 76', 'Bolsas 12 • Cajas 12 • Botellas 10 • Frascos 8 • Etiquetas 8 • Alimentos 10 • Cosméticos 8 • Farmacia 8', Column(children: [
